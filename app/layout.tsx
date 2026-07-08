@@ -29,7 +29,7 @@ export const viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#09090b",
+  themeColor: "#09080d",
 };
 
 export default function RootLayout({
@@ -39,7 +39,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans bg-zinc-950 text-zinc-200`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans bg-app text-zinc-200 antialiased`}>
         {children}
         <Toaster
           position="top-center"

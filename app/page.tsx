@@ -4,8 +4,6 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   RefreshCw,
   Search,
-  Package,
-  Wifi,
   WifiOff,
   Loader2,
   ChevronRight,
@@ -141,8 +139,8 @@ export default function ShiftScan() {
     );
   }, [allBoxes, listSearch]);
 
-  const lookupCode = (code: string) => {
-    const normalized = code.trim().toUpperCase();
+  const findManual = () => {
+    const normalized = manualCode.trim().toUpperCase();
     if (!normalized) return;
 
     const found = boxesMap.get(normalized);
@@ -152,10 +150,6 @@ export default function ShiftScan() {
     } else {
       toast.error(`No carton found for ${normalized}`);
     }
-  };
-
-  const findManual = () => {
-    lookupCode(manualCode);
     setManualCode("");
   };
 
@@ -168,21 +162,17 @@ export default function ShiftScan() {
     window.open(`https://www.delhivery.com/track/package/${tracking}`, "_blank");
   };
 
-  const handleTabChange = (tab: AppTab) => {
-    setActiveTab(tab);
-  };
-
   if (!SCRIPT_URL) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-zinc-950 p-6 text-zinc-100">
-        <div className="w-full max-w-sm rounded-3xl border border-zinc-800 bg-zinc-900/60 p-8 text-center backdrop-blur">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/20">
-            <WifiOff className="h-7 w-7 text-amber-400" />
+      <div className="flex min-h-dvh items-center justify-center bg-app p-6 text-zinc-100">
+        <div className="w-full max-w-sm rounded-2xl border border-subtle bg-surface p-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-violet-500/10">
+            <WifiOff className="h-5 w-5 text-violet-400" />
           </div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">Configuration needed</h1>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-            Set <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs text-cyan-300">NEXT_PUBLIC_APPS_SCRIPT_URL</code> in{" "}
-            <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs text-zinc-300">.env.local</code>, then restart the dev server.
+          <h1 className="font-display text-xl font-semibold">Setup required</h1>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+            Add <code className="text-violet-300">NEXT_PUBLIC_APPS_SCRIPT_URL</code> to{" "}
+            <code className="text-zinc-400">.env.local</code>
           </p>
         </div>
       </div>
@@ -190,30 +180,20 @@ export default function ShiftScan() {
   }
 
   return (
-    <div className="relative min-h-dvh bg-zinc-950 text-zinc-100">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute -right-16 top-20 h-80 w-80 rounded-full bg-violet-600/10 blur-3xl" />
-      </div>
-
-      <header className="sticky top-0 z-40 border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl pt-safe">
-        <div className="mx-auto flex max-w-md items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-teal-600 shadow-lg shadow-cyan-500/20">
-              <Package className="h-4 w-4 text-white" />
-            </div>
-            <div>
-              <p className="font-display text-lg font-semibold leading-none">ShiftScan</p>
-              <p className={`mt-0.5 flex items-center gap-1 text-[10px] ${isConnected ? "text-emerald-400" : "text-amber-400"}`}>
-                {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-                {isConnected ? `Live · ${lastUpdated || "synced"}` : "Offline"}
-              </p>
-            </div>
+    <div className="min-h-dvh bg-app text-zinc-100">
+      <header className="sticky top-0 z-40 border-b border-subtle bg-app/80 backdrop-blur-md pt-safe">
+        <div className="mx-auto flex max-w-md items-center justify-between px-5 py-4">
+          <div>
+            <h1 className="font-display text-lg font-semibold tracking-tight">ShiftScan</h1>
+            <p className={`mt-0.5 flex items-center gap-1.5 text-xs ${isConnected ? "text-zinc-500" : "text-amber-500/80"}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${isConnected ? "bg-violet-400" : "bg-amber-400"}`} />
+              {isConnected ? `${allBoxes.length} cartons · ${lastUpdated || "synced"}` : "Offline"}
+            </p>
           </div>
           <button
             onClick={() => fetchData()}
             disabled={isLoading}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/5 bg-zinc-900/80 text-zinc-300 transition hover:text-cyan-300 disabled:opacity-50"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-zinc-400 transition hover:text-violet-300 disabled:opacity-40"
             aria-label="Refresh"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
@@ -221,48 +201,46 @@ export default function ShiftScan() {
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-md px-4 pb-nav pt-4">
+      <main className="mx-auto max-w-md px-5 pb-nav pt-5">
         {activeTab === "scan" && (
-          <section className="space-y-4">
-            <div className="scanner-shell relative min-h-[52dvh] overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl">
+          <section>
+            <div className="scanner-shell relative min-h-[56dvh] overflow-hidden rounded-2xl border border-subtle bg-black">
               <div id={readerId} className="scanner-reader absolute inset-0" />
 
               {!isActive && !isStarting && (
-                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-900/95 p-8 text-center">
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-app/95 px-8 text-center">
                   {error ? (
                     <>
-                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/20">
-                        <AlertCircle className="h-7 w-7 text-amber-400" />
-                      </div>
-                      <p className="text-sm text-zinc-300">{error}</p>
+                      <AlertCircle className="mb-3 h-8 w-8 text-violet-400" />
+                      <p className="text-sm text-zinc-400">{error}</p>
                       <button
                         onClick={() => {
                           autoStartedRef.current = false;
                           start();
                         }}
-                        className="mt-5 rounded-2xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-zinc-950"
+                        className="btn-primary mt-5 rounded-full px-6 py-2.5 text-sm font-medium transition"
                       >
-                        Retry camera
+                        Retry
                       </button>
                     </>
                   ) : !isConnected ? (
                     <>
-                      <Loader2 className="mb-4 h-8 w-8 animate-spin text-cyan-400" />
-                      <p className="text-sm text-zinc-400">Connecting to sheet…</p>
+                      <Loader2 className="mb-3 h-7 w-7 animate-spin text-violet-400" />
+                      <p className="text-sm text-zinc-500">Syncing…</p>
                     </>
                   ) : (
                     <>
-                      <div className="pulse-ring relative mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-zinc-800 ring-1 ring-white/10">
-                        <ScanLine className="h-9 w-9 text-cyan-400" />
+                      <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface ring-1 ring-violet-500/20">
+                        <ScanLine className="h-7 w-7 text-violet-400" />
                       </div>
-                      <h2 className="font-display text-xl font-semibold">Ready to scan</h2>
-                      <p className="mt-1 text-sm text-zinc-400">Camera will start automatically</p>
+                      <h2 className="font-display text-lg font-medium">Scan carton</h2>
+                      <p className="mt-1 text-sm text-zinc-500">Camera starts automatically</p>
                       <button
                         onClick={start}
-                        className="mt-6 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-teal-500 px-6 py-3 text-sm font-semibold text-zinc-950"
+                        className="btn-primary mt-6 flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition"
                       >
                         <Camera className="h-4 w-4" />
-                        Start scanner
+                        Open camera
                       </button>
                     </>
                   )}
@@ -272,90 +250,84 @@ export default function ShiftScan() {
               {(isActive || isStarting) && (
                 <div className="pointer-events-none absolute inset-0 z-10">
                   <div className="flex h-full items-center justify-center">
-                    <div className="scan-frame relative h-28 w-[78%] max-w-xs rounded-xl border-2 border-cyan-400/70">
-                      <span className="absolute -left-0.5 -top-0.5 h-5 w-5 border-l-2 border-t-2 border-cyan-400" />
-                      <span className="absolute -right-0.5 -top-0.5 h-5 w-5 border-r-2 border-t-2 border-cyan-400" />
-                      <span className="absolute -bottom-0.5 -left-0.5 h-5 w-5 border-b-2 border-l-2 border-cyan-400" />
-                      <span className="absolute -bottom-0.5 -right-0.5 h-5 w-5 border-b-2 border-r-2 border-cyan-400" />
-                      <div className="scan-line absolute inset-x-2 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+                    <div className="scan-frame relative h-24 w-[72%] max-w-xs rounded-lg border border-violet-400/50">
+                      <span className="absolute -left-px -top-px h-4 w-4 border-l-2 border-t-2 border-violet-300" />
+                      <span className="absolute -right-px -top-px h-4 w-4 border-r-2 border-t-2 border-violet-300" />
+                      <span className="absolute -bottom-px -left-px h-4 w-4 border-b-2 border-l-2 border-violet-300" />
+                      <span className="absolute -bottom-px -right-px h-4 w-4 border-b-2 border-r-2 border-violet-300" />
+                      <div className="scan-line absolute inset-x-2 h-px" />
                     </div>
                   </div>
-                  <div className="absolute inset-x-0 bottom-0 border-t border-white/5 bg-zinc-950/90 px-4 py-3 text-center">
-                    <p className="text-xs text-zinc-400">
-                      {isStarting ? "Starting camera…" : "Align barcode inside the frame"}
-                    </p>
-                  </div>
+                  <p className="absolute inset-x-0 bottom-4 text-center text-xs text-zinc-400">
+                    {isStarting ? "Starting camera…" : "Align barcode in frame"}
+                  </p>
                 </div>
               )}
             </div>
-
-            <p className="text-center text-xs text-zinc-500">
-              Supports QR, Code 128, Code 39 &amp; EAN barcodes
-            </p>
           </section>
         )}
 
         {activeTab === "search" && (
-          <section className="space-y-5">
-            <div className="rounded-3xl border border-white/10 bg-zinc-900/60 p-6">
-              <h2 className="font-display text-2xl font-semibold">Manual lookup</h2>
-              <p className="mt-1 text-sm text-zinc-400">Type a carton code if the label won&apos;t scan</p>
+          <section className="space-y-6">
+            <div>
+              <h2 className="font-display text-xl font-semibold">Search</h2>
+              <p className="mt-1 text-sm text-zinc-500">Enter a carton code manually</p>
+            </div>
 
-              <div className="mt-5 flex gap-2">
-                <input
-                  value={manualCode}
-                  onChange={(e) => setManualCode(e.target.value.toUpperCase())}
-                  onKeyDown={(e) => e.key === "Enter" && findManual()}
-                  placeholder="BX-001"
-                  autoFocus
-                  className="flex-1 rounded-2xl border border-white/10 bg-zinc-950 px-4 py-3.5 font-mono text-base outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/15"
-                />
-                <button
-                  onClick={findManual}
-                  className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-teal-500 text-zinc-950"
-                  aria-label="Search"
-                >
-                  <Search className="h-5 w-5" />
-                </button>
-              </div>
+            <div className="flex gap-2">
+              <input
+                value={manualCode}
+                onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+                onKeyDown={(e) => e.key === "Enter" && findManual()}
+                placeholder="BX-001"
+                autoFocus
+                className="input-field flex-1 rounded-xl px-4 py-3 font-mono text-sm text-zinc-100"
+              />
+              <button
+                onClick={findManual}
+                className="btn-primary flex h-12 w-12 items-center justify-center rounded-xl transition"
+                aria-label="Search"
+              >
+                <Search className="h-4 w-4" />
+              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-white/5 bg-zinc-900/50 p-4">
-                <p className="text-[10px] uppercase tracking-wider text-zinc-500">Cartons loaded</p>
-                <p className="mt-1 font-display text-3xl font-semibold tabular-nums">{allBoxes.length}</p>
+              <div className="rounded-xl border border-subtle bg-surface p-4">
+                <p className="text-xs text-zinc-500">Loaded</p>
+                <p className="mt-1 font-display text-2xl font-semibold tabular-nums">{allBoxes.length}</p>
               </div>
-              <div className="rounded-2xl border border-white/5 bg-zinc-900/50 p-4">
-                <p className="text-[10px] uppercase tracking-wider text-zinc-500">Last sync</p>
-                <p className="mt-2 font-mono text-sm text-zinc-300">{lastUpdated || "—"}</p>
+              <div className="rounded-xl border border-subtle bg-surface p-4">
+                <p className="text-xs text-zinc-500">Last sync</p>
+                <p className="mt-2 font-mono text-sm text-zinc-400">{lastUpdated || "—"}</p>
               </div>
             </div>
           </section>
         )}
 
         {activeTab === "cartons" && (
-          <section className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-2xl font-semibold">All cartons</h2>
-              <span className="text-xs text-zinc-500">{filteredBoxes.length} total</span>
+          <section className="space-y-4">
+            <div className="flex items-end justify-between">
+              <h2 className="font-display text-xl font-semibold">Cartons</h2>
+              <span className="text-xs text-zinc-500">{filteredBoxes.length}</span>
             </div>
 
             <input
               value={listSearch}
               onChange={(e) => setListSearch(e.target.value)}
-              placeholder="Search code, owner, tracking…"
-              className="w-full rounded-2xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-sm outline-none focus:border-cyan-500/40"
+              placeholder="Search…"
+              className="input-field w-full rounded-xl px-4 py-3 text-sm text-zinc-100"
             />
 
-            <ul className="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/40">
+            <ul className="divide-y divide-white/[0.04] overflow-hidden rounded-xl border border-subtle">
               {filteredBoxes.map((box) => (
                 <li key={box.code}>
                   <button
                     onClick={() => setCurrentBox(box)}
-                    className="flex w-full items-center justify-between px-4 py-3.5 text-left transition active:bg-white/[0.04]"
+                    className="flex w-full items-center justify-between bg-surface px-4 py-3.5 text-left transition active:bg-surface-raised"
                   >
                     <div>
-                      <p className="font-mono text-sm font-semibold">{box.code}</p>
+                      <p className="font-mono text-sm font-medium text-zinc-100">{box.code}</p>
                       <p className="mt-0.5 text-xs text-zinc-500">
                         {box.owner || "Unassigned"} · {box.items.length} items
                       </p>
@@ -365,21 +337,19 @@ export default function ShiftScan() {
                 </li>
               ))}
               {filteredBoxes.length === 0 && (
-                <li className="px-4 py-10 text-center text-sm text-zinc-500">No cartons match your search</li>
+                <li className="bg-surface px-4 py-12 text-center text-sm text-zinc-500">No results</li>
               )}
             </ul>
           </section>
         )}
       </main>
 
-      <BottomNav activeTab={activeTab} onChange={handleTabChange} cartonCount={allBoxes.length} />
+      <BottomNav activeTab={activeTab} onChange={setActiveTab} cartonCount={allBoxes.length} />
 
       {currentBox && (
         <BoxDetailSheet
           box={currentBox}
-          onClose={() => {
-            setCurrentBox(null);
-          }}
+          onClose={() => setCurrentBox(null)}
           onCopyTracking={copyTracking}
           onTrackDelhivery={trackDelhivery}
         />
