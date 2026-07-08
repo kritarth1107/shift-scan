@@ -11,15 +11,20 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "ShiftScan • Carton Scanner",
+  title: "ShiftScan",
   description: "Scan carton barcodes and see owner + contents instantly",
+  manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "ShiftScan",
+  },
+  formatDetection: {
+    telephone: false,
   },
 };
 
@@ -44,9 +49,9 @@ export default function RootLayout({
         <Toaster
           position="top-center"
           richColors
-          closeButton
           toastOptions={{
-            className: "font-sans",
+            className: "font-sans !rounded-2xl",
+            style: { marginTop: "env(safe-area-inset-top)" },
           }}
         />
       </body>

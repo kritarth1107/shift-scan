@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { X, Truck, Copy, ExternalLink } from "lucide-react";
 
 interface BoxItem {
@@ -17,14 +18,14 @@ export interface Box {
 }
 
 const OWNER_STYLES: Record<string, string> = {
-  KRITARTH: "bg-violet-500/12 text-violet-300",
-  SHUBHAM: "bg-emerald-500/12 text-emerald-300",
-  RAHUL: "bg-amber-500/12 text-amber-300",
-  SHOBHIT: "bg-rose-500/12 text-rose-300",
+  KRITARTH: "owner-kritarth",
+  SHUBHAM: "owner-shubham",
+  RAHUL: "owner-rahul",
+  SHOBHIT: "owner-shobhit",
 };
 
 function getOwnerStyle(owner?: string) {
-  return OWNER_STYLES[(owner || "").toUpperCase()] ?? "bg-zinc-800 text-zinc-400";
+  return OWNER_STYLES[(owner || "").toUpperCase()] ?? "owner-default";
 }
 
 interface BoxDetailSheetProps {
@@ -35,69 +36,78 @@ interface BoxDetailSheetProps {
 }
 
 export function BoxDetailSheet({ box, onClose, onCopyTracking, onTrackDelhivery }: BoxDetailSheetProps) {
-  return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 backdrop-blur-[2px]">
-      <div className="animate-fade-up flex max-h-[88dvh] w-full max-w-md flex-col rounded-t-[1.75rem] border border-subtle bg-app">
-        <div className="flex flex-col items-center pt-3">
-          <div className="sheet-handle" />
-        </div>
+  useEffect(() => {
+    document.body.classList.add("sheet-open");
+    return () => document.body.classList.remove("sheet-open");
+  }, []);
 
-        <div className="flex items-start justify-between px-5 pb-4 pt-3">
+  return (
+    <div className="app-sheet-backdrop" onClick={onClose}>
+      <div className="app-sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-handle" />
+
+        <div className="flex items-start justify-between px-5 pb-3 pt-1">
           <div>
-            <p className="text-xs text-zinc-500">Carton</p>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Carton details</p>
             <h2 className="font-display text-2xl font-semibold tracking-tight">{box.code}</h2>
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-raised text-zinc-400 transition hover:text-white"
+            className="icon-btn"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="overflow-y-auto overscroll-contain px-5 pb-safe">
-          <div className="flex items-start justify-between gap-4 rounded-2xl bg-surface p-4">
-            <div>
+        <div className="app-sheet-body">
+          <div className="ios-group">
+            <div className="ios-row flex items-center justify-between !py-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${getOwnerStyle(box.owner)}`}>
+                <span className={`owner-badge ${getOwnerStyle(box.owner)}`}>
                   {box.owner || "Unassigned"}
                 </span>
                 {box.dimension && (
                   <span className="font-mono text-xs text-zinc-500">{box.dimension}</span>
                 )}
               </div>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-zinc-500">Items</p>
-              <p className="font-display text-3xl font-semibold tabular-nums metallic-purple-text">{box.items.length}</p>
+              <div className="text-right">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Items</p>
+                <p className="font-display text-2xl font-semibold tabular-nums metallic-purple-text">
+                  {box.items.length}
+                </p>
+              </div>
             </div>
           </div>
 
           {box.deliveryType && box.deliveryType !== "-" && (
-            <div className="mt-4 flex items-center gap-3">
-              <span className="text-xs text-zinc-500">Delivery</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs text-zinc-300">
-                <Truck className="h-3 w-3 text-violet-400" />
-                {box.deliveryType}
-              </span>
+            <div className="ios-group mt-4">
+              <div className="ios-row flex items-center justify-between">
+                <span className="text-sm text-zinc-400">Delivery</span>
+                <span className="inline-flex items-center gap-1.5 text-sm text-zinc-200">
+                  <Truck className="h-3.5 w-3.5 text-violet-400" />
+                  {box.deliveryType}
+                </span>
+              </div>
             </div>
           )}
 
           {box.tracking && box.tracking !== "-" && (
-            <div className="mt-4 space-y-2">
-              <p className="text-xs text-zinc-500">Tracking</p>
+            <div className="ios-group mt-4">
               <button
                 onClick={() => onCopyTracking(box.tracking!)}
-                className="input-field flex w-full items-center justify-between rounded-xl px-3 py-2.5 font-mono text-sm text-zinc-200"
+                className="ios-row flex w-full items-center justify-between text-left"
               >
-                <span className="truncate">{box.tracking}</span>
-                <Copy className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
+                <span className="text-sm text-zinc-400">Tracking</span>
+                <span className="flex items-center gap-2 font-mono text-sm text-zinc-200">
+                  <span className="max-w-[160px] truncate">{box.tracking}</span>
+                  <Copy className="h-3.5 w-3.5 text-zinc-500" />
+                </span>
               </button>
               {box.deliveryType?.includes("DELHIVERY") && (
                 <button
                   onClick={() => onTrackDelhivery(box.tracking!)}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-subtle bg-surface py-2.5 text-xs text-zinc-300 transition hover:border-primary"
+                  className="ios-row flex w-full items-center justify-center gap-2 text-sm text-violet-300"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   Track on Delhivery
@@ -106,21 +116,17 @@ export function BoxDetailSheet({ box, onClose, onCopyTracking, onTrackDelhivery 
             </div>
           )}
 
-          <div className="mt-6">
-            <p className="mb-3 text-xs text-zinc-500">Contents</p>
+          <p className="ios-section-label">Contents</p>
+          <div className="ios-group">
             {box.items.length > 0 ? (
-              <ul className="divide-y divide-white/[0.04] overflow-hidden rounded-xl border border-subtle">
-                {box.items.map((item, idx) => (
-                  <li key={idx} className="flex items-center justify-between bg-surface px-4 py-3 text-sm">
-                    <span className="text-zinc-200">{item.particular}</span>
-                    <span className="font-mono tabular-nums text-zinc-500">{item.qty}</span>
-                  </li>
-                ))}
-              </ul>
+              box.items.map((item, idx) => (
+                <div key={idx} className="ios-row flex items-center justify-between gap-3">
+                  <span className="text-sm text-zinc-200">{item.particular}</span>
+                  <span className="qty-badge">{item.qty}</span>
+                </div>
+              ))
             ) : (
-              <p className="rounded-xl border border-subtle bg-surface px-4 py-8 text-center text-sm text-zinc-500">
-                No items listed
-              </p>
+              <div className="ios-row py-8 text-center text-sm text-zinc-500">No items listed</div>
             )}
           </div>
         </div>

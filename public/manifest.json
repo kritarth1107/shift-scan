@@ -1,0 +1,24 @@
+{
+  "name": "ShiftScan",
+  "short_name": "ShiftScan",
+  "description": "Scan carton barcodes and view contents instantly",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09080d",
+  "theme_color": "#09080d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
