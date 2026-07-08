@@ -46,7 +46,7 @@ export function BoxDetailSheet({ box, onClose, onCopyTracking, onTrackDelhivery 
       <div className="app-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-handle" />
 
-        <div className="flex items-start justify-between px-5 pb-3 pt-1">
+        <div className="app-sheet-header flex items-start justify-between px-5 pb-3 pt-1">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Carton details</p>
             <h2 className="font-display text-2xl font-semibold tracking-tight">{box.code}</h2>
